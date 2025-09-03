@@ -22,50 +22,58 @@ function App() {
 
   // Auto-populate jobDescription and requiredSkills from URL params on mount
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-
-    const skills = params.get('skills') || '';
-    const jobDesc = params.get('job') || '';
-    const jobtitle = params.get('jobtitle') || '';
-    useEffect(() => {
-      try {
-        const params = new URLSearchParams(window.location.search);
-    
-        const skills = params.get('skills') || '';
-        const jobDesc = params.get('job') || '';
-        const jobtitle = params.get('jobtitle') || '';
-        const jobtype = params.get('jobtype') || '';
-        const yoe = params.get('yoe') || '';
-    
-        const jobTypeMap = {
-          'Full time': 'fulltime',
-          'Part time': 'parttime',
-          'Contract': 'contract',
-          'Freelance': 'freelance',
-          'Internship': 'internship',
-        };
-    
-        const decodedJobTypeLabel = decodeURIComponent(jobtype || '').trim();
-        const matchedJobTypeValue = jobTypeMap[decodedJobTypeLabel] || '';
-    
-        setFormData(prev => ({
-          ...prev,
-          requiredSkills: decodeURIComponent(skills || ''),
-          jobDescription: decodeURIComponent(jobDesc || ''),
-          yearsOfExperience: decodeURIComponent(yoe || ''),
-          jobTitle: decodeURIComponent(jobtitle || ''),
-          jobType: matchedJobTypeValue,
-        }));
-      } catch (error) {
-        console.error("Failed to parse URL params or set form data:", error);
-      }
-    }, []);
-    
-    console.log("Auto-populated from URL:", {
-      requiredSkills: skills,
-      jobDescription: jobDesc,
-    });
+    try {
+      const params = new URLSearchParams(window.location.search);
+  
+      const skillsParam = params.get('skills') || '';
+      const jobDescParam = params.get('job') || '';
+      const jobtitleParam = params.get('jobtitle') || '';
+      const jobtypeParam = params.get('jobtype') || '';
+      const yoeParam = params.get('yoe') || '';
+  
+      // Defensive decodeURIComponent calls
+      const decodeSafe = (str) => {
+        try {
+          return decodeURIComponent(str);
+        } catch {
+          console.warn("Failed to decode URI component:", str);
+          return '';
+        }
+      };
+  
+      const skills = decodeSafe(skillsParam);
+      const jobDescription = decodeSafe(jobDescParam);
+      const jobTitle = decodeSafe(jobtitleParam);
+      const jobTypeLabel = decodeSafe(jobtypeParam).trim();
+      const yearsOfExperience = decodeSafe(yoeParam);
+  
+      const jobTypeMap = {
+        'Full time': 'fulltime',
+        'Part time': 'parttime',
+        'Contract': 'contract',
+        'Freelance': 'freelance',
+        'Internship': 'internship',
+      };
+  
+      const jobTypeValue = jobTypeMap[jobTypeLabel] || '';
+  
+      console.log("Parsed params:", { skills, jobDescription, jobTitle, jobTypeLabel, jobTypeValue, yearsOfExperience });
+  
+      setFormData(prev => ({
+        ...prev,
+        requiredSkills: skills,
+        jobDescription: jobDescription,
+        yearsOfExperience: yearsOfExperience,
+        jobTitle: jobTitle,
+        jobType: jobTypeValue,
+      }));
+    } catch (error) {
+      console.error("Error parsing URL parameters or setting form data:", error);
+    }
   }, []);
+  
+    
+   
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
