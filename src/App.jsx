@@ -26,12 +26,21 @@ function App() {
 
     const skills = params.get('skills') || '';
     const jobDesc = params.get('job') || '';
+    const jobtitle = params.get('jobtitle') || '';
+    const jobtype = params.get('jobtype') || '';
+    const yoe = params.get('yoe') || '';
 
     // Make sure to decode and assign correctly
     setFormData(prev => ({
       ...prev,
       requiredSkills: decodeURIComponent(skills),
       jobDescription: decodeURIComponent(jobDesc),
+      yearsOfExperience: decodeURIComponent(yoe),
+      jobTitle: decodeURIComponent(jobtitle),
+      jobType: decodeURIComponent(jobtype),
+
+
+
     }));
 
     console.log("Auto-populated from URL:", {
