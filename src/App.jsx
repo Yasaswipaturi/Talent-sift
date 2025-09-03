@@ -26,9 +26,8 @@ function App() {
 
     const skills = params.get('skills') || '';
     const jobDesc = params.get('job') || '';
-    console.log(skills);
-    console.log(jobDesc);
 
+    // Make sure to decode and assign correctly
     setFormData(prev => ({
       ...prev,
       requiredSkills: decodeURIComponent(skills),
@@ -48,9 +47,11 @@ function App() {
     }));
   };
 
+  // Helper to strip HTML tags from job description
   const stripHtml = (html) => {
     const div = document.createElement('div');
     div.innerHTML = html;
+    // Add space after block elements to keep words separate
     const blockTags = ['p', 'div', 'br', 'li'];
     blockTags.forEach(tag => {
       const elements = div.getElementsByTagName(tag);
@@ -101,7 +102,7 @@ function App() {
         });
       }
 
-      // 🔁 Send to Agentic AI
+      // Send to Agentic AI
       const response = await fetch(
         "https://agentic-ai.co.in/api/agentic-ai/workflow-exe",
         { method: "POST", body: form }
@@ -120,7 +121,7 @@ function App() {
         throw new Error("Invalid resume ranking result format from Agentic AI.");
       }
 
-      // 🔁 Send to ServiceNow (as JSON)
+      // Send to ServiceNow
       const servicenowResponse = await axios.post(
         'https://dev187243.service-now.com/api/1763965/resumerankingapi/upload',
         resumeResults,
