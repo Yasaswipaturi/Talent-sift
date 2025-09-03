@@ -28,38 +28,39 @@ function App() {
     const jobDesc = params.get('job') || '';
     const jobtitle = params.get('jobtitle') || '';
     useEffect(() => {
-      const params = new URLSearchParams(window.location.search);
+      try {
+        const params = new URLSearchParams(window.location.search);
     
-      const skills = params.get('skills') || '';
-      const jobDesc = params.get('job') || '';
-      const jobtitle = params.get('jobtitle') || '';
-      const jobtype = params.get('jobtype') || '';
-      const yoe = params.get('yoe') || '';
+        const skills = params.get('skills') || '';
+        const jobDesc = params.get('job') || '';
+        const jobtitle = params.get('jobtitle') || '';
+        const jobtype = params.get('jobtype') || '';
+        const yoe = params.get('yoe') || '';
     
-      // Map display labels to actual select values
-      const jobTypeMap = {
-        'Full time': 'fulltime',
-        'Part time': 'parttime',
-        'Contract': 'contract',
-        'Freelance': 'freelance',
-        'Internship': 'internship'
-      };
+        const jobTypeMap = {
+          'Full time': 'fulltime',
+          'Part time': 'parttime',
+          'Contract': 'contract',
+          'Freelance': 'freelance',
+          'Internship': 'internship',
+        };
     
-      const decodedJobTypeLabel = decodeURIComponent(jobtype).trim();
-      const matchedJobTypeValue = jobTypeMap[decodedJobTypeLabel] || '';
+        const decodedJobTypeLabel = decodeURIComponent(jobtype || '').trim();
+        const matchedJobTypeValue = jobTypeMap[decodedJobTypeLabel] || '';
     
-      setFormData(prev => ({
-        ...prev,
-        requiredSkills: decodeURIComponent(skills),
-        jobDescription: decodeURIComponent(jobDesc),
-        yearsOfExperience: decodeURIComponent(yoe),
-        jobTitle: decodeURIComponent(jobtitle),
-        jobType: matchedJobTypeValue
-      }));
-
-
+        setFormData(prev => ({
+          ...prev,
+          requiredSkills: decodeURIComponent(skills || ''),
+          jobDescription: decodeURIComponent(jobDesc || ''),
+          yearsOfExperience: decodeURIComponent(yoe || ''),
+          jobTitle: decodeURIComponent(jobtitle || ''),
+          jobType: matchedJobTypeValue,
+        }));
+      } catch (error) {
+        console.error("Failed to parse URL params or set form data:", error);
+      }
     }, []);
-
+    
     console.log("Auto-populated from URL:", {
       requiredSkills: skills,
       jobDescription: jobDesc,
