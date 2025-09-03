@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import ResumeDropzoneStyled from '@/components/ResumeDropzoneStyled';
+import ResumeMultiDropzone from '@/components/ResumeMultiDropzone';
 import pic from '../pic.png';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -65,8 +65,9 @@ const JobFormStep1 = ({ formData, handleInputChange, handleSubmit }) => {
     if (!formData.requiredSkills) newErrors.requiredSkills = 'Key skills are required';
     if (!formData.jobDescription || formData.jobDescription.trim().length === 0) {
       newErrors.jobDescription = 'Job description is required';
+    if (!formData.resumeFiles || formData.resumeFiles.length === 0) newErrors.resumeFiles = 'At least one resume must be uploaded';
     }
-    if (!formData.resumeFile) newErrors.resumeFile = 'Resume file is required';
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -229,11 +230,12 @@ const JobFormStep1 = ({ formData, handleInputChange, handleSubmit }) => {
             </div>
 
             {/* Resume Upload */}
-            <ResumeDropzoneStyled
-              onFileSelected={(file) => handleInputChange('resumeFile', file)}
-              defaultFile={formData.resumeFile}
-            />
-            {errors.resumeFile && <p className="text-red-600 text-sm">{errors.resumeFile}</p>}
+            <ResumeMultiDropzone
+                  onFilesSelected={(files) => handleInputChange('resumeFiles', files)}
+                  defaultFiles={formData.resumeFiles}
+                  disabled={isLoading}
+                />
+                {errors.resumeFiles && <p className="text-red-600 text-sm">{errors.resumeFiles}</p>}
 
             {/* Job Description */}
             <div className="space-y-2">
