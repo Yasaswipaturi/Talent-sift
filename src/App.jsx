@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Toaster } from '@/components/ui/toaster';
@@ -19,6 +19,27 @@ function App() {
   });
 
   const { toast } = useToast();
+
+  // Auto-populate jobDescription and requiredSkills from URL params on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    const skills = params.get('skills') || '';
+    const jobDesc = params.get('job') || '';
+    console.log(skills);
+    console.log(jobdesc);
+
+    setFormData(prev => ({
+      ...prev,
+      requiredSkills: decodeURIComponent(skills),
+      jobDescription: decodeURIComponent(jobDesc),
+    }));
+
+    console.log("Auto-populated from URL:", {
+      requiredSkills: skills,
+      jobDescription: jobDesc,
+    });
+  }, []);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -102,11 +123,11 @@ function App() {
       // 🔁 Send to ServiceNow (as JSON)
       const servicenowResponse = await axios.post(
         'https://dev187243.service-now.com/api/1763965/resumerankingapi/upload',
-        resumeResults, // or { data: resumeResults } if your SN API expects wrapped input
+        resumeResults,
         {
           auth: {
             username: 'admin',
-            password: 'aTw3Prz$PR/7' // ⚠️ Don't hardcode this in production
+            password: 'aTw3Prz$PR/7' // ⚠️ Don't hardcode in production
           },
           headers: {
             'Content-Type': 'application/json',

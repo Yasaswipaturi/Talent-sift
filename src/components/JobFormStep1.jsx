@@ -203,9 +203,11 @@ const JobFormStep1 = ({ formData, handleInputChange, handleSubmit }) => {
                     <SelectValue placeholder="Select Job Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="remote">Remote</SelectItem>
-                    <SelectItem value="onsite">On-site</SelectItem>
-                    <SelectItem value="hybrid">Hybrid</SelectItem>
+                    <SelectItem value="fulltime">Full time</SelectItem>
+                    <SelectItem value="parttime">Part time</SelectItem>
+                    <SelectItem value="contract">Contract</SelectItem>
+                    <SelectItem value="freelance">Freelance</SelectItem>
+                    <SelectItem value="internship">Internship</SelectItem>
                   </SelectContent>
                 </Select>
                 {errors.jobType && <p className="text-red-600 text-sm">{errors.jobType}</p>}
