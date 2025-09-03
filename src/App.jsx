@@ -22,55 +22,39 @@ function App() {
 
   // Auto-populate jobDescription and requiredSkills from URL params on mount
   useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(window.location.search);
   
-      const skillsParam = params.get('skills') || '';
-      const jobDescParam = params.get('job') || '';
-      const jobtitleParam = params.get('jobtitle') || '';
-      const jobtypeParam = params.get('jobtype') || '';
-      const yoeParam = params.get('yoe') || '';
+    const decodeSafe = (str) => {
+      try {
+        return decodeURIComponent(str);
+      } catch {
+        return '';
+      }
+    };
   
-      // Defensive decodeURIComponent calls
-      const decodeSafe = (str) => {
-        try {
-          return decodeURIComponent(str);
-        } catch {
-          console.warn("Failed to decode URI component:", str);
-          return '';
-        }
-      };
+    const jobTypeLabel = decodeSafe(params.get('jobtype') || '').trim();
   
-      const skills = decodeSafe(skillsParam);
-      const jobDescription = decodeSafe(jobDescParam);
-      const jobTitle = decodeSafe(jobtitleParam);
-      const jobTypeLabel = decodeSafe(jobtypeParam).trim();
-      const yearsOfExperience = decodeSafe(yoeParam);
+    // Map labels from URL param to select values exactly
+    const jobTypeMap = {
+      'Full time': 'fulltime',
+      'Part time': 'parttime',
+      'Contract': 'contract',
+      'Freelance': 'freelance',
+      'Internship': 'internship',
+    };
   
-      const jobTypeMap = {
-        'Full time': 'fulltime',
-        'Part time': 'parttime',
-        'Contract': 'contract',
-        'Freelance': 'freelance',
-        'Internship': 'internship',
-      };
+    const mappedJobType = jobTypeMap[jobTypeLabel] || '';
   
-      const jobTypeValue = jobTypeMap[jobTypeLabel] || '';
-  
-      console.log("Parsed params:", { skills, jobDescription, jobTitle, jobTypeLabel, jobTypeValue, yearsOfExperience });
-  
-      setFormData(prev => ({
-        ...prev,
-        requiredSkills: skills,
-        jobDescription: jobDescription,
-        yearsOfExperience: yearsOfExperience,
-        jobTitle: jobTitle,
-        jobType: jobTypeValue,
-      }));
-    } catch (error) {
-      console.error("Error parsing URL parameters or setting form data:", error);
-    }
+    setFormData(prev => ({
+      ...prev,
+      requiredSkills: decodeSafe(params.get('skills') || ''),
+      jobDescription: decodeSafe(params.get('job') || ''),
+      yearsOfExperience: decodeSafe(params.get('yoe') || ''),
+      jobTitle: decodeSafe(params.get('jobtitle') || ''),
+      jobType: mappedJobType,  // THIS MUST BE a valid option value or empty string
+    }));
   }, []);
+  
   
     
    
