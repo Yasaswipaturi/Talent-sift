@@ -27,7 +27,7 @@ function App() {
     const skills = params.get('skills') || '';
     const jobDesc = params.get('job') || '';
     console.log(skills);
-    console.log(jobdesc);
+    console.log(jobDesc);
 
     setFormData(prev => ({
       ...prev,
