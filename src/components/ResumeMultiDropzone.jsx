@@ -3,14 +3,16 @@ import { useDropzone } from 'react-dropzone';
 import { FileText, CheckCircle, Trash2 } from 'lucide-react';
 
 const ResumeMultiDropzone = ({ onFilesSelected, defaultFiles = [] }) => {
-  const [files, setFiles] = useState(defaultFiles);
+  const [files, setFiles] = useState(Array.isArray(defaultFiles) ? defaultFiles : []);
   const [error, setError] = useState('');
 
-  const MAX_SIZE = 2 * 1024 * 1024; 
+  const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+  const MAX_FILES = 100; // Maximum number of files allowed
 
   const onDrop = useCallback((acceptedFiles, fileRejections) => {
-    setError('');
+    setError(''); // Reset error message
 
+    // Handle file rejections
     if (fileRejections.length > 0) {
       const rejectedFile = fileRejections[0];
       if (rejectedFile.errors.some(e => e.code === 'file-too-large')) {
@@ -21,17 +23,22 @@ const ResumeMultiDropzone = ({ onFilesSelected, defaultFiles = [] }) => {
       return;
     }
 
-    if (acceptedFiles.length > 0) {
-      const newFiles = [...files, ...acceptedFiles];
-      setFiles(newFiles);
-      onFilesSelected(newFiles); 
+    // Check if the number of files exceeds the max limit
+    if (files.length + acceptedFiles.length > MAX_FILES) {
+      setError(`You can only upload up to ${MAX_FILES} files.`);
+      return;
     }
+
+    // Add files to the state
+    const newFiles = [...files, ...acceptedFiles];
+    setFiles(newFiles);
+    onFilesSelected(newFiles); // Notify the parent component
   }, [files, onFilesSelected]);
 
   const removeFile = (fileToRemove) => {
     const updatedFiles = files.filter(file => file !== fileToRemove);
     setFiles(updatedFiles);
-    onFilesSelected(updatedFiles); 
+    onFilesSelected(updatedFiles); // Propagate the updated files to the parent component
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -41,7 +48,7 @@ const ResumeMultiDropzone = ({ onFilesSelected, defaultFiles = [] }) => {
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
     },
     maxSize: MAX_SIZE,
-    multiple: true, 
+    multiple: true,
   });
 
   return (
@@ -65,6 +72,7 @@ const ResumeMultiDropzone = ({ onFilesSelected, defaultFiles = [] }) => {
           <div className="space-y-1">
             <p className="text-sm text-gray-600">Drag & drop resumes here, or click to select.</p>
             <p className="text-sm text-gray-600">PDF or DOCX only. Max 2MB per file.</p>
+            <p className="text-sm text-gray-600">You can upload up to 100 files.</p>
           </div>
         ) : (
           <div className="w-full space-y-2">
