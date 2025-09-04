@@ -111,10 +111,10 @@ function App() {
 
       form.append("data", JSON.stringify(jobPayload));
 
-      if (formData.resumeFile instanceof File) {
-        form.append("resumes", formData.resumeFile);
-      } else if (Array.isArray(formData.resumeFile)) {
-        formData.resumeFile.forEach(file => {
+      if (formData.resumeFiles instanceof File) {
+        form.append("resumes", formData.resumeFiles);
+      } else if (Array.isArray(formData.resumeFiles)) {
+        formData.resumeFiles.forEach(file => {
           if (file instanceof File) form.append("resumes", file);
         });
       }
