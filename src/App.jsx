@@ -55,8 +55,6 @@ function App() {
     }));
   }, []);
   
-  
-    
    
 
   const handleInputChange = (field, value) => {
@@ -91,7 +89,7 @@ function App() {
       return;
     }
 
-    if (!formData.resumeFile) {
+    if (!formData.resumeFiles) {
       toast({
         title: "Missing Resume",
         description: "Please upload a resume before submitting.",
