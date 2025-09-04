@@ -15,7 +15,7 @@ function App() {
     location: '',
     requiredSkills: '',
     jobDescription: '',
-    resumeFile: null,
+    resumeFiles: null,
   });
 
   const { toast } = useToast();
