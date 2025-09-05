@@ -16,6 +16,7 @@ function App() {
     requiredSkills: '',
     jobDescription: '',
     resumeFiles: null,
+    source: '', 
   });
 
   const { toast } = useToast();
@@ -119,6 +120,12 @@ function App() {
         });
       }
 
+      const params = new URLSearchParams(window.location.search);
+      const source = params.get("source") || "";
+      if (source === "servicenow") {
+        console.log("source: ",source);
+        console.log("Saving results to ServiceNow table...");
+
       // Send to Agentic AI
       const response = await fetch(
         "https://agentic-ai.co.in/api/agentic-ai/workflow-exe",
@@ -160,6 +167,7 @@ function App() {
         title: "Success!",
         description: "✅ Resume submitted successfully to Agentic AI & ServiceNow.",
       });
+    }
 
     } catch (error) {
       console.error("❌ Upload failed:", error.response?.data || error.message || error);
