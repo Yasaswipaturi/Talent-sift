@@ -169,15 +169,54 @@ function App() {
       });
     }
 
-    } catch (error) {
-      console.error("❌ Upload failed:", error.response?.data || error.message || error);
+    else if (source === "qntrl") {
+      console.log("source: ", source);
+      console.log("Passing results to Qntrl job...");
+    
+      const qntrlJobPayload = {
+        name: formData.jobTitle,
+        score: formData.yearsOfExperience,
+        phone: formData.jobType,   // adjust mapping if needed
+        email: formData.location,  // adjust mapping if needed
+        justification: stripHtml(formData.jobDescription),
+      };
+    
+      const qntrlResponse = await fetch(
+        "https://orchestly.zoho.com/blueprint/api/v1/tables/30725000001317206/rows",   // <-- instead of hitting blueprint API directly
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(qntrlJobPayload)
+        }
+      );
+    
+      const qntrlResult = await qntrlResponse.json();
+    
+      if (!qntrlResponse.ok) {
+        throw new Error(qntrlResult.message || `Job creation failed with status ${qntrlResponse.status}`);
+      }
+    
+      console.log("✅ Qntrl job created:", qntrlResult);
+    
       toast({
-        title: "Upload Failed",
-        description: "❌ Something went wrong. Check console for details.",
-        variant: "destructive"
+        title: "Success!",
+        description: "✅ Data successfully submitted to Qntrl job.",
       });
     }
-  };
+    
+    
+  } catch (error) {
+    console.error("❌ Upload failed:", error.response?.data || error.message || error);
+    toast({
+      title: "Upload Failed",
+      description: "❌ Something went wrong. Check console for details.",
+      variant: "destructive"
+    });
+  }
+};
+
 
   return (
     <HelmetProvider>
