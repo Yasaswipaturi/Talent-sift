@@ -171,40 +171,59 @@ function App() {
 
     else if (source === "qntrl") {
       console.log("source: ", source);
-      console.log("Passing results to Qntrl job...");
+      console.log("Passing Agentic AI results to Qntrl...");
     
-      const qntrlJobPayload = {
-        name: formData.jobTitle,
-        score: formData.yearsOfExperience,
-        phone: formData.jobType,   // adjust mapping if needed
-        email: formData.location,  // adjust mapping if needed
-        justification: stripHtml(formData.jobDescription),
-      };
-    
-      const qntrlResponse = await fetch(
-        "https://orchestly.zoho.com/blueprint/api/v1/tables/30725000001317206/rows",   // <-- instead of hitting blueprint API directly
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(qntrlJobPayload)
-        }
-      );
-    
-      const qntrlResult = await qntrlResponse.json();
-    
-      if (!qntrlResponse.ok) {
-        throw new Error(qntrlResult.message || `Job creation failed with status ${qntrlResponse.status}`);
+      const resumeResults = result.data?.result;
+      if (!Array.isArray(resumeResults) || resumeResults.length === 0) {
+        toast({
+          title: "No Results",
+          description: "Agentic AI returned no valid results to send to Qntrl.",
+          variant: "destructive"
+        });
+        return;
       }
     
-      console.log("✅ Qntrl job created:", qntrlResult);
+      // Map each result to Qntrl fields
+      const qntrlRows = resumeResults.map(item => ({
+        name: item.name || "",
+        score: item.score || "",
+        phone: item.phone || "",
+        email: item.email || "",
+        justification: item.justification || ""
+      }));
     
-      toast({
-        title: "Success!",
-        description: "✅ Data successfully submitted to Qntrl job.",
-      });
-    }
+      try {
+        const qntrlResponse = await fetch(
+          "https://core.qntrl.com/blueprint/api/startitnow/customfunction/executefunction/30725000001381119?auth_type=oauth",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(qntrlRows) // send array directly
+          }
+        );
+    
+        const qntrlResult = await qntrlResponse.json();
+    
+        if (!qntrlResponse.ok) {
+          throw new Error(qntrlResult.message || "Qntrl submission failed");
+        }
+    
+        console.log("✅ Agentic AI results successfully sent to Qntrl:", qntrlResult);
+    
+        toast({
+          title: "Success!",
+          description: "✅ Agentic AI results successfully submitted to Qntrl.",
+        });
+    
+      } catch (error) {
+        console.error("❌ Qntrl submission failed:", error.message || error);
+        toast({
+          title: "Submission Failed",
+          description: "❌ Something went wrong sending results to Qntrl.",
+          variant: "destructive"
+        });
+      } // <- closes the inner try/catch
+    } // <- closes the else if (source === "qntrl")
     
     
   } catch (error) {
