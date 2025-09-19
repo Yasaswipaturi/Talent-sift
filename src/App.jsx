@@ -16,7 +16,7 @@ function App() {
     requiredSkills: '',
     jobDescription: '',
     resumeFiles: null,
-    source: '', 
+    source: '',
   });
 
   const { toast } = useToast();
@@ -24,7 +24,7 @@ function App() {
   // Auto-populate jobDescription and requiredSkills from URL params on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-  
+
     const decodeSafe = (str) => {
       try {
         return decodeURIComponent(str);
@@ -32,9 +32,9 @@ function App() {
         return '';
       }
     };
-  
+
     const jobTypeLabel = decodeSafe(params.get('jobtype') || '').trim();
-  
+
     // Map labels from URL param to select values exactly
     const jobTypeMap = {
       'Full time': 'fulltime',
@@ -43,20 +43,19 @@ function App() {
       'Freelance': 'freelance',
       'Internship': 'internship',
     };
-  
+
     const mappedJobType = jobTypeMap[jobTypeLabel] || '';
-  
+
     setFormData(prev => ({
       ...prev,
       requiredSkills: decodeSafe(params.get('skills') || ''),
       jobDescription: decodeSafe(params.get('job') || ''),
       yearsOfExperience: decodeSafe(params.get('yoe') || ''),
       jobTitle: decodeSafe(params.get('jobtitle') || ''),
-      jobType: mappedJobType,  // THIS MUST BE a valid option value or empty string
+      jobType: mappedJobType,  // valid option or empty string
     }));
   }, []);
-  
-   
+
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -69,7 +68,7 @@ function App() {
   const stripHtml = (html) => {
     const div = document.createElement('div');
     div.innerHTML = html;
-    // Add space after block elements to keep words separate
+    // Add space after block elements
     const blockTags = ['p', 'div', 'br', 'li'];
     blockTags.forEach(tag => {
       const elements = div.getElementsByTagName(tag);
@@ -122,11 +121,8 @@ function App() {
 
       const params = new URLSearchParams(window.location.search);
       const source = params.get("source") || "";
-      if (source === "servicenow") {
-        console.log("source: ",source);
-        console.log("Saving results to ServiceNow table...");
 
-      // Send to Agentic AI
+      // ✅ Call Agentic AI always first
       const response = await fetch(
         "https://agentic-ai.co.in/api/agentic-ai/workflow-exe",
         { method: "POST", body: form }
@@ -141,102 +137,92 @@ function App() {
       console.log("✅ Agentic AI response:", result.data);
 
       const resumeResults = result.data?.result;
-      if (!Array.isArray(resumeResults)) {
-        throw new Error("Invalid resume ranking result format from Agentic AI.");
-      }
-
-      // Send to ServiceNow
-      const servicenowResponse = await axios.post(
-        'https://dev187243.service-now.com/api/1763965/resumerankingapi/upload',
-        resumeResults,
-        {
-          auth: {
-            username: 'admin',
-            password: 'aTw3Prz$PR/7' // ⚠️ Don't hardcode in production
-          },
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json'
-          }
-        }
-      );
-
-      console.log("✅ ServiceNow Response:", servicenowResponse.data);
-
-      toast({
-        title: "Success!",
-        description: "✅ Resume submitted successfully to Agentic AI & ServiceNow.",
-      });
-    }
-
-    else if (source === "qntrl") {
-      console.log("source: ", source);
-      console.log("Passing Agentic AI results to Qntrl...");
-    
-      const resumeResults = result.data?.result;
       if (!Array.isArray(resumeResults) || resumeResults.length === 0) {
-        toast({
-          title: "No Results",
-          description: "Agentic AI returned no valid results to send to Qntrl.",
-          variant: "destructive"
-        });
-        return;
+        throw new Error("Agentic AI returned no valid results.");
       }
-    
-      // Map each result to Qntrl fields
-      const qntrlRows = resumeResults.map(item => ({
-        name: item.name || "",
-        score: item.score || "",
-        phone: item.phone || "",
-        email: item.email || "",
-        justification: item.justification || ""
-      }));
-    
-      try {
-        const qntrlResponse = await fetch(
-          "https://core.qntrl.com/blueprint/api/startitnow/customfunction/executefunction/30725000001381119?auth_type=oauth",
+
+      // Branch by source
+      if (source === "servicenow") {
+        console.log("source:", source);
+        console.log("Saving results to ServiceNow table...");
+
+        const servicenowResponse = await axios.post(
+          'https://dev187243.service-now.com/api/1763965/resumerankingapi/upload',
+          resumeResults,
           {
-            method: "POST",
-            Authorization: "Zoho-oauthtoken 1001.5463f5c0493a16f6bb82c3e842f58b22.1c6aa695092e2f82178622fc6e9e9e06",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(qntrlRows) // send array directly
+            auth: {
+              username: 'admin',
+              password: 'aTw3Prz$PR/7' // ⚠️ avoid hardcoding in production
+            },
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json'
+            }
           }
         );
-    
-        const qntrlResult = await qntrlResponse.json();
-    
-        if (!qntrlResponse.ok) {
-          throw new Error(qntrlResult.message || "Qntrl submission failed");
+
+        console.log("✅ ServiceNow Response:", servicenowResponse.data);
+
+        toast({
+          title: "Success!",
+          description: "✅ Resume submitted successfully to Agentic AI & ServiceNow.",
+        });
+      }
+
+      else if (source === "qntrl") {
+        console.log("source:", source);
+        console.log("Passing Agentic AI results to Qntrl...");
+
+        // Send each result individually to match custom function input params
+        for (const item of resumeResults) {
+          const payload = {
+            name: item.name || "",
+            score: item.score || "",
+            phone: item.phone || "",
+            email: item.email || "",
+            justification: item.justification || ""
+          };
+
+          try {
+            const qntrlResponse = await fetch(
+              "https://core.qntrl.com/blueprint/api/startitnow/customfunction/executefunction/30725000001381119?auth_type=oauth",
+              {
+                method: "POST",
+                headers: {
+                  "Authorization": "Zoho-oauthtoken 1001.5463f5c0493a16f6bb82c3e842f58b22.1c6aa695092e2f82178622fc6e9e9e06", // 🔑 Replace with real token
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+              }
+            );
+
+            const qntrlResult = await qntrlResponse.json();
+
+            if (!qntrlResponse.ok) {
+              throw new Error(qntrlResult.message || "Qntrl submission failed");
+            }
+
+            console.log("✅ Sent to Qntrl:", qntrlResult);
+          } catch (err) {
+            console.error("❌ Qntrl submission failed:", err.message || err);
+          }
         }
-    
-        console.log("✅ Agentic AI results successfully sent to Qntrl:", qntrlResult);
-    
+
         toast({
           title: "Success!",
           description: "✅ Agentic AI results successfully submitted to Qntrl.",
         });
-    
-      } catch (error) {
-        console.error("❌ Qntrl submission failed:", error.message || error);
-        toast({
-          title: "Submission Failed",
-          description: "❌ Something went wrong sending results to Qntrl.",
-          variant: "destructive"
-        });
-      } // <- closes the inner try/catch
-    } // <- closes the else if (source === "qntrl")
-    
-    
-  } catch (error) {
-    console.error("❌ Upload failed:", error.response?.data || error.message || error);
-    toast({
-      title: "Upload Failed",
-      description: "❌ Something went wrong. Check console for details.",
-      variant: "destructive"
-    });
-  }
-};
+      }
 
+    } catch (error) {
+      console.error("❌ Upload failed:", error.response?.data || error.message || error);
+      toast({
+        title: "Upload Failed",
+        description: "❌ Something went wrong. Check console for details.",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <HelmetProvider>
