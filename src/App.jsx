@@ -35,7 +35,6 @@ function App() {
 
     const jobTypeLabel = decodeSafe(params.get('jobtype') || '').trim();
 
-    // Map labels from URL param to select values exactly
     const jobTypeMap = {
       'Full time': 'fulltime',
       'Part time': 'parttime',
@@ -52,10 +51,9 @@ function App() {
       jobDescription: decodeSafe(params.get('job') || ''),
       yearsOfExperience: decodeSafe(params.get('yoe') || ''),
       jobTitle: decodeSafe(params.get('jobtitle') || ''),
-      jobType: mappedJobType,  // valid option or empty string
+      jobType: mappedJobType,
     }));
   }, []);
-
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -64,11 +62,9 @@ function App() {
     }));
   };
 
-  // Helper to strip HTML tags from job description
   const stripHtml = (html) => {
     const div = document.createElement('div');
     div.innerHTML = html;
-    // Add space after block elements
     const blockTags = ['p', 'div', 'br', 'li'];
     blockTags.forEach(tag => {
       const elements = div.getElementsByTagName(tag);
@@ -122,7 +118,7 @@ function App() {
       const params = new URLSearchParams(window.location.search);
       const source = params.get("source") || "";
 
-      // ✅ Call Agentic AI always first
+      // ✅ Always call Agentic AI first
       const response = await fetch(
         "https://agentic-ai.co.in/api/agentic-ai/workflow-exe",
         { method: "POST", body: form }
@@ -152,12 +148,12 @@ function App() {
           {
             auth: {
               username: 'admin',
-              password: 'aTw3Prz$PR/7' // ⚠️ avoid hardcoding in production
+              password: 'aTw3Prz$PR/7', // ⚠️ avoid hardcoding in production
             },
             headers: {
               'Content-Type': 'application/json',
-              Accept: 'application/json'
-            }
+              Accept: 'application/json',
+            },
           }
         );
 
@@ -173,7 +169,7 @@ function App() {
         console.log("source:", source);
         console.log("Passing Agentic AI results to Qntrl...");
 
-        // Send each result individually to match custom function input params
+        // Send each result individually to Qntrl custom function
         for (const item of resumeResults) {
           const payload = {
             name: item.name || "",
@@ -189,7 +185,7 @@ function App() {
               {
                 method: "POST",
                 headers: {
-                  "Authorization": "Zoho-oauthtoken 1001.5463f5c0493a16f6bb82c3e842f58b22.1c6aa695092e2f82178622fc6e9e9e06", // 🔑 Replace with real token
+                  "Authorization": "Zoho-oauthtoken 1001.5463f5c0493a16f6bb82c3e842f58b22.1c6aa695092e2f82178622fc6e9e9e06", // replace with a real token
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify(payload),
