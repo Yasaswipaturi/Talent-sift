@@ -137,6 +137,22 @@ function App() {
         throw new Error("Agentic AI returned no valid results.");
       }
 
+      await fetch("http://localhost:5000/api/sendEmail", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    to: "768363363_30725000001300117@startitnow.mail.qntrl.com",
+    subject: "Screening Results",
+    results: resumeResults
+  }),
+});
+
+toast({
+  title: "Email Sent",
+  description: "✅ Screening results emailed successfully."
+});
+
+
       // Branch by source
       if (source === "servicenow") {
         console.log("source:", source);
