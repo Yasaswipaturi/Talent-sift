@@ -123,36 +123,14 @@ function App() {
         "https://agentic-ai.co.in/api/agentic-ai/workflow-exe",
         { method: "POST", body: form }
       );
+ const result = await response.json();
 
-      const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.message || `Upload failed with status ${response.status}`);
+    }
 
-      if (!response.ok) {
-        throw new Error(result.message || `Upload failed with status ${response.status}`);
-      }
-
-      console.log("✅ Agentic AI response:", result.data);
-
-      const resumeResults = result.data?.result;
-      if (!Array.isArray(resumeResults) || resumeResults.length === 0) {
-        throw new Error("Agentic AI returned no valid results.");
-      }
-
-      await fetch("http://localhost:5000/api/sendEmail", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    to: "768363363_30725000001415201@startitnow.mail.qntrl.com",
-    subject: "Screening Results",
-    results: resumeResults
-  }),
-});
-
-toast({
-  title: "Email Sent",
-  description: "✅ Screening results emailed successfully."
-});
-
-
+    const resumeResults = result.data?.result;
+    
       // Branch by source
       if (source === "servicenow") {
         console.log("source:", source);
@@ -197,11 +175,11 @@ toast({
 
           try {
             const qntrlResponse = await fetch(
-              "https://core.qntrl.com/blueprint/api/startitnow/customfunction/executefunction/30725000001381119?auth_type=oauth",
+              "https://core.qntrl.com/blueprint/api/startitnow/customfunction/executefunction/30725000001381119",
               {
                 method: "POST",
                 headers: {
-                  "Authorization": "Zoho-oauthtoken 1001.5463f5c0493a16f6bb82c3e842f58b22.1c6aa695092e2f82178622fc6e9e9e06", // replace with a real token
+                  "Authorization": "Bearer 1001.5463f5c0493a16f6bb82c3e842f58b22.1c6aa695092e2f82178622fc6e9e9e06", // replace with a real token
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify(payload),
