@@ -175,7 +175,7 @@ function App() {
 
           try {
             const qntrlResponse = await fetch(
-              "https://core.qntrl.com/blueprint/api/startitnow/customfunction/executefunction/30725000001381119",
+              "https://core.qntrl.com/blueprint/api/startitnow/customfunction/executefunction/30725000001381119?auth_type=oauth",
               {
                 method: "POST",
                 headers: {
